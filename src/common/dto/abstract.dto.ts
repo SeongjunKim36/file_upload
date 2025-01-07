@@ -13,4 +13,8 @@ export abstract class AbstractDto {
 
     @ApiProperty()
     updatedAt!: Date;
+
+    constructor() {
+        // 빈 생성자
+    }
 }

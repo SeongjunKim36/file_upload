@@ -6,6 +6,7 @@ import { LocalStorageService } from '../storage/local-storage.service';
 import { S3StorageService } from '../storage/s3-storage.service';
 import { StorageType } from '../enums/storage-type.enum';
 import { IFileStorage } from '../interfaces/file-storage.interface';
+import { FileDto } from '../dtos/file.dto';
 
 @Injectable()
 export class FilesService {
@@ -27,28 +28,31 @@ export class FilesService {
         }
     }
 
-    async uploadFile(file: Express.Multer.File, storageType: StorageType = StorageType.S3) {
-        const storageService = this.getStorageService(storageType);
-        const path = await storageService.upload(file);
+    async uploadFile(file: Express.Multer.File, storageType: StorageType = StorageType.LOCAL): Promise<FileEntity> {
+        const storage = this.getStorageService(storageType);
+        const path = await storage.upload(file);
         
+        const metadata = JSON.stringify({
+            encoding: file.encoding
+        });
+
         const fileEntity = this.fileRepository.create({
             originalName: file.originalname,
             mimeType: file.mimetype,
             size: file.size,
             path: path,
             storageType: storageType,
-            metadata: JSON.stringify({
-                encoding: file.encoding,
-            })
+            metadata: metadata
         });
-
+        
         const savedFile = await this.fileRepository.save(fileEntity);
-        return savedFile.toDto();
+        console.log('Saved file entity:', savedFile);
+        return savedFile;
     }
 
-    async getFileInfo(id: string) {
+    async getFileInfo(id: string): Promise<FileDto> {
         const file = await this.fileRepository.findOneOrFail({ where: { id } });
-        return file.toDto();
+        return new FileDto(file);
     }
 
     async getFileContent(id: string): Promise<Buffer> {

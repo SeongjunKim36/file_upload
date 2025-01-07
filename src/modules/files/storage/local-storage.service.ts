@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { IFileStorage } from '../interfaces/file-storage.interface';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { Readable } from 'stream';
 
 @Injectable()
 export class LocalStorageService implements IFileStorage {
@@ -14,10 +13,15 @@ export class LocalStorageService implements IFileStorage {
     }
 
     async upload(file: Express.Multer.File): Promise<string> {
+        // multer의 diskStorage를 사용하는 경우 이미 파일이 저장되어 있음
+        if (file.path) {
+            return file.path;
+        }
+
+        // buffer를 사용하는 경우 (메모리 스토리지)
         const fileName = `${Date.now()}-${file.originalname}`;
         const filePath = path.join(this.uploadPath, fileName);
-        const stream = Readable.from(file.buffer);
-        await fs.writeFile(filePath, stream);
+        await fs.writeFile(filePath, file.buffer);
         return filePath;
     }
 
