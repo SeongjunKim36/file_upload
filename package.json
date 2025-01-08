@@ -28,7 +28,7 @@
     "migration:run": "ts-node ./node_modules/typeorm/cli.js migration:run -f ormconfig",
     "schema:drop": "ts-node node_modules/typeorm/cli.js schema:drop -f ormconfig",
     "start": "ts-node -r tsconfig-paths/register src/main.ts",
-    "start:dev": "npm run swagger:generate && nest start --watch",
+    "start:dev": "nest start --watch",
     "start:debug": "tsc-watch -p tsconfig.build.json --onSuccess \"node --inspect-brk dist/main.js\"",
     "start:prod": "node dist/main.js",
     "lint": "eslint '{src,apps,libs,test}/**/*.ts'",
@@ -38,6 +38,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "swagger": "npx nestia swagger --config nestia.config.ts --project tsconfig.json",
+    "start:swagger": "yarn swagger && ts-node executable/swagger.ts --skipBuild",
     "swagger:generate": "nestia swagger",
     "swagger:dev": "nestia swagger --watch",
     "prepare": "ts-patch install && typia patch"
@@ -84,7 +86,8 @@
     "typia": "^7.5.1",
     "uuid": "^9.0.0",
     "winston": "^3.2.1",
-    "winston-daily-rotate-file": "^3.10.0"
+    "winston-daily-rotate-file": "^3.10.0",
+    "yarn": "^1.22.22"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.6.7",

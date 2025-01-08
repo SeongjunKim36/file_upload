@@ -5,24 +5,16 @@ import * as path from 'path';
 
 @Injectable()
 export class LocalStorageService implements IFileStorage {
-    private readonly uploadPath = 'uploads';
+    async upload(file: File): Promise<string> {
+        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
+        const filename = `${uniqueSuffix}${path.extname(file.name)}`;
+        const filepath = path.join('uploads', filename);
 
-    constructor() {
-        // uploads 디렉토리 생성
-        fs.mkdir(this.uploadPath, { recursive: true });
-    }
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        await fs.writeFile(filepath, buffer);
 
-    async upload(file: Express.Multer.File): Promise<string> {
-        // multer의 diskStorage를 사용하는 경우 이미 파일이 저장되어 있음
-        if (file.path) {
-            return file.path;
-        }
-
-        // buffer를 사용하는 경우 (메모리 스토리지)
-        const fileName = `${Date.now()}-${file.originalname}`;
-        const filePath = path.join(this.uploadPath, fileName);
-        await fs.writeFile(filePath, file.buffer);
-        return filePath;
+        return filepath;
     }
 
     async getFile(path: string): Promise<Buffer> {

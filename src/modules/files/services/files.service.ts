@@ -28,21 +28,17 @@ export class FilesService {
         }
     }
 
-    async uploadFile(file: Express.Multer.File, storageType: StorageType = StorageType.LOCAL): Promise<FileEntity> {
+    async uploadFile(file: File, storageType: StorageType = StorageType.LOCAL): Promise<FileEntity> {
         const storage = this.getStorageService(storageType);
         const path = await storage.upload(file);
         
-        const metadata = JSON.stringify({
-            encoding: file.encoding
-        });
-
         const fileEntity = this.fileRepository.create({
-            originalName: file.originalname,
-            mimeType: file.mimetype,
+            originalName: file.name,
+            mimeType: file.type,
             size: file.size,
             path: path,
             storageType: storageType,
-            metadata: metadata
+            metadata: JSON.stringify({})
         });
         
         const savedFile = await this.fileRepository.save(fileEntity);
